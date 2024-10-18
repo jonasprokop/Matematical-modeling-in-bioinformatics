@@ -81,7 +81,3 @@ class ET_model():
             legend_title="Cell Type"
         )
         fig_xy.show()
-
-simple_model_with_dose_treatment_repeated_infection =  ET_model(E=10**1, T=10**2, p=0.5, m=1, n=2, r=0.1, k=0.05, c=1, u=0.01, v=1, s=0.1, d=0.01, time_points=[0.5, 0.8, 1.6, 1.9, 3.5], strength=10**1, delta_t = 0.01, treatment_present = True)
-simple_model_with_dose_treatment_repeated_infection._observe_repated_infection(iterations = 1000, num_of_infections = 8, dose = 10**2)
-simple_model_with_dose_treatment_repeated_infection._plot_scatter()
