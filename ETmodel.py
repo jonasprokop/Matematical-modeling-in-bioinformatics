@@ -45,10 +45,10 @@ class ET_model():
         return self.results
 
     def _observe_repated_infection(self, iterations, num_of_infections, dose):
-        infection_step = iterations/num_of_infections
+        infection_step = int(iterations * (1/(num_of_infections+1)))
         # observing n states of the system
         for count in range(iterations):
-            if count % infection_step == 0 and count > 0:
+            if count % infection_step == 0 and count not in [0, iterations]:
                 self.T += dose
             if self._treatment_present:
                 self._insert_injection()
@@ -82,3 +82,6 @@ class ET_model():
         )
         fig_xy.show()
 
+simple_model_with_dose_treatment_repeated_infection =  ET_model(E=10**1, T=10**2, p=0.5, m=1, n=2, r=0.1, k=0.05, c=1, u=0.01, v=1, s=0.1, d=0.01, time_points=[0.5, 0.8, 1.6, 1.9, 3.5], strength=10**1, delta_t = 0.01, treatment_present = True)
+simple_model_with_dose_treatment_repeated_infection._observe_repated_infection(iterations = 1000, num_of_infections = 8, dose = 10**2)
+simple_model_with_dose_treatment_repeated_infection._plot_scatter()
