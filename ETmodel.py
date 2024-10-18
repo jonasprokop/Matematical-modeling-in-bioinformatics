@@ -48,11 +48,11 @@ class ET_model():
         infection_step = iterations/num_of_infections
         # observing n states of the system
         for count in range(iterations):
-            if (count - 1) % infection_step == 0 and count > 5:
+            if count % infection_step == 0:
                 self.T += dose
-            self._update()
             if self._treatment_present:
                 self._insert_injection()
+            self._update()
             self.results.append([self.E, self.T])
             self.num_of_iterations += 1
         return self.results
@@ -81,6 +81,4 @@ class ET_model():
             legend_title="Cell Type"
         )
         fig_xy.show()
-
-
 
