@@ -48,7 +48,7 @@ class ET_model():
         infection_step = iterations/num_of_infections
         # observing n states of the system
         for count in range(iterations):
-            if count % infection_step == 0:
+            if count % infection_step == 0 and count > 0:
                 self.T += dose
             if self._treatment_present:
                 self._insert_injection()
