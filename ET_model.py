@@ -2,26 +2,23 @@ from plotly import graph_objects as go
 
 import numpy as np
 class ET_model():
-    def __init__(self, E, T, p, m, n, r, k, c, u, v, s, d, time_points, strength, delta_t = 0.01, treatment_present = False):
-        self.E = E # num efektor
-        self.T = T # num target
-        self.p = p 
-        self.m = m
-        self.n = n
-        self.r = r
-        self.k = k
-        self.c = c
-        self.u = u
-        self.v = v
-        self.s = s
-        self.d = d
-        self.delta_t = delta_t
-        self._treatment_present = treatment_present
-        self._time_points = time_points
-        self.strength = strength
+    # Class that implements the ET model computations and adds a function for inserting either effector or target cells
 
-        self.num_of_iterations=0
-        self.results=[]
+    def __init__(self, E, T, p, m, n, r, k, c, v, s, d, delta_t = 0.01):
+        self.E = E  # Initial number of effector cells (immune cells)
+        self.T = T  # Initial number of target cells (disease cells)
+        self.p = p  # Growth rate of effector cells based on target cell count
+        self.m = m  # Half-saturation constant for target cell stimulation
+        self.n = n  # Hill coefficient for effector cell proliferation 
+        self.r = r  # Natural growth rate of target cells
+        self.k = k  # Killing rate of target cells by effector cells
+        self.c = c  # Half-saturation constant for effector cell self-regulation 
+        self.v = v  # Hill coefficient for target cell influence on effector cell growth
+        self.s = s  # Rate of effector cell self-renewal
+        self.d = d  # Death rate of effector cells
+        self.delta_t = delta_t # Timestep for one iteration in the model
+        self.num_of_iterations=0 # Number iterations
+        self.results=[] # Dict for results colection
 
     def _update(self):
         # Compute rates of change for T and E
@@ -34,40 +31,43 @@ class ET_model():
         self.T += dT_dt * self.delta_t
         self.E += dE_dt * self.delta_t
 
-    def _observe(self, iterations):
-        # observing n states of the system
-        for count in range(iterations):
+    def observe(self, iterations, modulation):
+        # Observing n states of the system
+        modulation_points, modulation_schedulge = self._plan_modulation(modulation)
+        
+        for iteration in range(iterations):
             self._update()
-            if self._treatment_present:
-                self._insert_injection()
+            if iteration in modulation_points:
+                self._insert_injection(modulation_schedulge[iteration])
             self.results.append([self.E, self.T])
             self.num_of_iterations += 1
         return self.results
-
-    def _observe_repated_infection(self, iterations, num_of_infections, dose):
-        infection_step = int(iterations * (1/(num_of_infections+1)))
-        # observing n states of the system
-        for count in range(iterations):
-            if count % infection_step == 0 and count not in [0, iterations]:
-                self.T += dose
-            if self._treatment_present:
-                self._insert_injection()
-            self._update()
-            self.results.append([self.E, self.T])
-            self.num_of_iterations += 1
-        return self.results
-
-    def _insert_injection(self):
-        # dosing the treatment
-        time = self.delta_t * self.num_of_iterations
-        for time_point in self._time_points:
-            if time_point == time:
-                self.T -= self.strength     
-                if self.T < 0:
-                    self.T = 0       
     
-    def _plot_scatter(self):
-        #scatter plot výsledků
+    
+    def _plan_modulation(modulation):
+        # Adjust the modulation triplets into apropriate form
+        modulation_schedulge = {}
+        for triplet in modulation:
+            modulation_schedulge[triplet[1]] = [triplet[0], triplet[2]]
+        modulation_points = modulation_schedulge.keys()
+        return modulation_points, modulation_schedulge
+    
+    def _insert_injection(self, modulation):
+        # Inserts an injection of either effector or target cells,
+        # While keeping the null condition for cell count for negative injections (eg. killing each cell type)
+
+        if modulation[0] == "E":
+            self.E += modulation[1]
+            if self.E < 0:
+                self.E = 0
+
+        if modulation[0] == "T":
+            self.T += modulation[1] 
+            if self.E < 0:
+                self.E = 0
+    
+    def plot_scatter(self):
+        # Scatter plot výsledků
         E_values = [res[0] for res in self.results]
         T_values = [res[1] for res in self.results]
         iterations = list(range(1, len(self.results)))
@@ -84,6 +84,3 @@ class ET_model():
 
 
 # přidat fázový diagram
-# bude to potřeba překopat tak, že spojíš oba dva modely, a nastavíš tam variable time injectcí
-# ideál bude překopat tu funkci tak, aby se tam dali volit 2x2 mody operandi - eg. volit mezi injekci T a E, a volit mezi regularizovaným dosingem a point time dosingem
-#
