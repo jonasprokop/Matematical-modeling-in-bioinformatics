@@ -43,7 +43,7 @@ def evolve_grid(value_grid, entry_grid):
 def evolve_grid_n_times(epochs, value_grid, entry_grid):
     results = []
     for epoch in range(epochs):
-        entry_grid = evolve_grid(len(entry_grid), value_grid, entry_grid)
+        entry_grid = evolve_grid(value_grid, entry_grid)
         results.append(list(entry_grid.values()))
     return results
 
