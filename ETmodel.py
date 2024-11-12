@@ -1,7 +1,7 @@
 from plotly import graph_objects as go
+
 import numpy as np
 class ET_model():
-    # koukej zakomentit proměnný
     def __init__(self, E, T, p, m, n, r, k, c, u, v, s, d, time_points, strength, delta_t = 0.01, treatment_present = False):
         self.E = E # num efektor
         self.T = T # num target
@@ -81,3 +81,9 @@ class ET_model():
             legend_title="Cell Type"
         )
         fig_xy.show()
+
+
+# přidat fázový diagram
+# bude to potřeba překopat tak, že spojíš oba dva modely, a nastavíš tam variable time injectcí
+# ideál bude překopat tu funkci tak, aby se tam dali volit 2x2 mody operandi - eg. volit mezi injekci T a E, a volit mezi regularizovaným dosingem a point time dosingem
+#
