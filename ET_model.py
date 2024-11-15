@@ -7,8 +7,8 @@ class ET_model():
     # and plots the results both in a scatter and phase plot
 
     def __init__(self, E, T, p, m, n, r, k, c, u, v, s, d, delta_t = 0.01):
-        self._E = E  # Initial number of effector cells (immune cells)
-        self._T = T  # Initial number of target cells (disease cells)
+        self._E0 = E  # Initial number of effector cells (immune cells)
+        self._T0 = T  # Initial number of target cells (disease cells)
         self._p = p  # Growth rate of effector cells based on target cell count
         self._m = m  # Half-saturation constant for target cell stimulation
         self._n = n  # Hill coefficient for effector cell proliferation 
@@ -21,7 +21,8 @@ class ET_model():
         self._d = d  # Death rate of effector cells
         self._delta_t = delta_t # Timestep for one iteration in the model
         self._num_of_iterations=0 # Number of iterations
-        self._results_array=np.array([]) # Array for results colection
+        self._T =np.array([]) # Array for results colection
+        self._E =np.array([]) # Array for results colection
 
     def _update(self, T_prev, E_prev):
         # Compute rates of change for T and E
@@ -56,36 +57,32 @@ class ET_model():
         # Observing n states of the system
         self._iterations = iterations
         self._results_array = np.zeros((iterations, 2))
-        T = np.zeros(iterations)
-        E = np.zeros(iterations)
-        T[0] = self._T
-        E[0] = self._E
+        self._T = np.zeros(iterations)
+        self._E = np.zeros(iterations)
+        self._T[0] = self._T0
+        self._E[0] = self._E0
         T_modulation, E_modulation = self._prepare_modulation_schedule(iterations, modulation)
         
         for iteration in range(1, iterations):
             # First the initial state of the system is noted
-            self._results_array[iteration] = [self._E, self._T]
+            self._results_array[iteration] = [self._E0, self._T0]
             # Then planned modulation is applied based on preprepared modulation arrays
-            T_prev = max(0, T[iteration - 1] + T_modulation[iteration])
-            E_prev = max(0, E[iteration - 1] + E_modulation[iteration])
+            T_prev = max(0, self._T[iteration - 1] + T_modulation[iteration])
+            E_prev = max(0, self._E[iteration - 1] + E_modulation[iteration])
             # At last the system updates to the next state
-            T[iteration], E[iteration] = self._update(T_prev, E_prev)
-        
+            self._T[iteration], self._E[iteration] = self._update(T_prev, E_prev)
         
         self._iterations_aray = np.arange(self._iterations)
-        self._results_array = np.vstack((E, T)).T
-            
+        
         return self._results_array
 
     
     def plot_scatter(self):
         # Scatter plot 
 
-        E_values, T_values = self._results_array[:, 0], self._results_array[:, 1]
-
         fig_xy = go.Figure()
-        fig_xy.add_trace(go.Scatter(x=self._iterations_aray, y=E_values, mode='lines+markers', name='Effector cells (E)', line=dict(color='blue')))
-        fig_xy.add_trace(go.Scatter(x=self._iterations_aray, y=T_values, mode='lines+markers', name='Target cells (T)', line=dict(color='green')))
+        fig_xy.add_trace(go.Scatter(x=self._iterations_aray, y=self._E, mode='lines+markers', name='Effector cells (E)', line=dict(color='blue')))
+        fig_xy.add_trace(go.Scatter(x=self._iterations_aray, y=self._T, mode='lines+markers', name='Target cells (T)', line=dict(color='green')))
 
         fig_xy.update_layout(
             title="Effector cells (E) and target cells (T) over time",
@@ -95,17 +92,13 @@ class ET_model():
         )
         fig_xy.show()
 
-        return fig_xy
-
 
     def plot_phase_diagram(self):
         # Phase diagram plot
-        
-        E_values, T_values = self._results_array[:, 0], self._results_array[:, 1]
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(
-            x=T_values, y=E_values, mode='lines', name='Trajectory',
+            x=self._T, y=self._E, mode='lines', name='Trajectory',
             line=dict(color='royalblue', width=2)
         ))
 
@@ -117,11 +110,3 @@ class ET_model():
         )
 
         fig.show()
-
-        return fig
-
-
-simple_model = ET_model(E=1, T=5*10**4, p=0.7, m=1, n=3, r=0.15, k=0.1, c=1, u = 1, v=2, s=2, d=1, delta_t = 0.01)
-simple_model.observe(10**3, modulation=[["E", 5*10**2, 5*10**1]])
-simple_model.plot_scatter()
-simple_model.plot_phase_diagram()
