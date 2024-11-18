@@ -1,10 +1,11 @@
 from plotly import graph_objects as go
 import numpy as np
+import matplotlib.pyplot as plt
 
 class ET_model():
     # Class that implements the ET model computations,
     # adds a function for inserting either effector or target cells
-    # and plots the results both in a scatter and phase plot
+    # and plots the results both in a scatter and trajectory plot
 
     def __init__(self, E, T, p, m, n, r, k, c, u, v, s, d, delta_t = 0.01):
         self._E0 = E  # Initial number of effector cells (immune cells)
@@ -20,12 +21,12 @@ class ET_model():
         self._s = s  # Rate of effector cell self-renewal
         self._d = d  # Death rate of effector cells
         self._delta_t = delta_t # Timestep for one iteration in the model
-        self._num_of_iterations=0 # Number of iterations
-        self._T =np.array([]) # Array for results colection
-        self._E =np.array([]) # Array for results colection
+        self._num_of_iterations = 0 # Number of iterations
+        self._T = np.array([]) # Array for T results colection
+        self._E = np.array([]) # Array for E results colection
 
     def _update(self, T_prev, E_prev):
-        # Compute rates of change for T and E
+        # Computes rates of change for T and E
         dT_dt = self._r * T_prev - self._k * T_prev * E_prev
         dE_dt = (
             self._p * ((T_prev**self._u) / (self._m**self._v + T_prev**self._v)) +
@@ -33,7 +34,7 @@ class ET_model():
             self._d * E_prev
         )
 
-        # Apply updates based on timestep 
+        # Applys updates based on timestep 
         T_next = max(0, T_prev + dT_dt * self._delta_t)
         E_next = max(0, E_prev + dE_dt * self._delta_t)
 
@@ -56,7 +57,7 @@ class ET_model():
     def observe(self, iterations, modulation=[]):
         # Observing n states of the system
         self._iterations = iterations
-        self._results_array = np.zeros((iterations, 2))
+        self._iterations_aray = np.arange(self._iterations)
         self._T = np.zeros(iterations)
         self._E = np.zeros(iterations)
         self._T[0] = self._T0
@@ -64,49 +65,45 @@ class ET_model():
         T_modulation, E_modulation = self._prepare_modulation_schedule(iterations, modulation)
         
         for iteration in range(1, iterations):
-            # First the initial state of the system is noted
-            self._results_array[iteration] = [self._E0, self._T0]
-            # Then planned modulation is applied based on preprepared modulation arrays
+            # Planned modulation is applied based on preprepared modulation arrays
             T_prev = max(0, self._T[iteration - 1] + T_modulation[iteration])
             E_prev = max(0, self._E[iteration - 1] + E_modulation[iteration])
-            # At last the system updates to the next state
+            # And the system updates to the next state
             self._T[iteration], self._E[iteration] = self._update(T_prev, E_prev)
         
         self._iterations_aray = np.arange(self._iterations)
         
-        return self._results_array
-
+        return self._T, self._E
     
     def plot_scatter(self):
         # Scatter plot 
 
         fig_xy = go.Figure()
+
         fig_xy.add_trace(go.Scatter(x=self._iterations_aray, y=self._E, mode='lines+markers', name='Effector cells (E)', line=dict(color='blue')))
         fig_xy.add_trace(go.Scatter(x=self._iterations_aray, y=self._T, mode='lines+markers', name='Target cells (T)', line=dict(color='green')))
 
         fig_xy.update_layout(
-            title="Effector cells (E) and target cells (T) over time",
+            title="Effector cells (E) and Target cells (T) over Iterations (Time)",
             xaxis_title="Iterations (Time)",
             yaxis_title="Cell counts",
             legend_title="Cell type"
         )
         fig_xy.show()
 
+    def plot_trajectory(self):
+        # Trajectory plot
 
-    def plot_phase_diagram(self):
-        # Phase diagram plot
+        plt.figure(figsize=(10, 8))
 
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=self._T, y=self._E, mode='lines', name='Trajectory',
-            line=dict(color='royalblue', width=2)
-        ))
-
-        fig.update_layout(
-            title="Phase diagram: Counts of effector cells (E) vs target cells (T)",
-            xaxis_title="Count of target cells (T)",
-            yaxis_title="Count of effector cells (E)",
-            showlegend=False
-        )
-
-        fig.show()
+        plt.plot(self._T, self._E, label="Trajectory", color='blue')
+        
+        plt.scatter(self._T[0], self._E[0], color='green', label='Start (T0, E0)')
+        plt.scatter(self._T[-1], self._E[-1], color='red', label='End (T, E)')
+        
+        plt.xlabel("Target cells (T)")
+        plt.ylabel("Effector cells (E)")
+        plt.title("Phase plane trajectory")
+        plt.legend()
+        plt.grid()
+        plt.show()
