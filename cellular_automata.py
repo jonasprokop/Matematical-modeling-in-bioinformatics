@@ -5,7 +5,7 @@ import numpy as np
 
 
 # Rule 90
-value_grid = {0:0, 1:1, 2:0, 3:1, 4:1, 5:0, 6:1, 7:0}
+value_grid = {0:0, 1:1, 2:0, 3:1, 4:1, 5:0, 6:1, 7:1}
 
 
 # dict implementation
