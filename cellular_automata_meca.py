@@ -53,16 +53,18 @@ class Meca_Cellular_Automata:
 
         return results
 
-    def _plot_binary_map(self, results):
+    def _plot_binary_map(self, results, rule_number):
         # Visualize the evolution of the grid
         plt.figure(figsize=(15, 10))
         plt.imshow(results, cmap='binary', interpolation='nearest', aspect='auto')
         plt.colorbar(label="State (0 or 1)")
         plt.xlabel("Cell Index")
         plt.ylabel("Epoch")
-        plt.title("Evolution of Cellular Automaton")
+        value_grid = self._generate_value_grid(rule_number)
+        plt.title(f"Evolution of Cellular Automaton based on rule number: {rule_number} \n {value_grid}")
         plt.show()
 
+    # Simulate all of the rules defined 
     def _simulate_all_rules(self):
         for rule_number in range(256):
             value_grid = self._generate_value_grid(rule_number)
@@ -74,6 +76,9 @@ class Meca_Cellular_Automata:
                 print("I have finished solving the whole space of grids")
         return self._all_results
 
+    # visualises the selected rule based on precomputed term
     def view_rule_number(self, rule_number):
         results = self._all_results[rule_number]
-        self._plot_binary_map(results)
+        if not results:
+            print("The grids must be solved prior to visualsation")
+        self._plot_binary_map(results, rule_number)
