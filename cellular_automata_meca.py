@@ -74,11 +74,18 @@ class Meca_Cellular_Automata:
                 print(f"I have solved grids for rules num {rule_number-10} - {rule_number}")
             elif rule_number == 255:
                 print("I have finished solving the whole space of grids")
-        return self._all_results
+
 
     # visualises the selected rule based on precomputed term
     def view_rule_number(self, rule_number):
         results = self._all_results[rule_number]
         if not results:
-            print("The grids must be solved prior to visualsation")
+            print("Grids must be solved prior to visualsation")
         self._plot_binary_map(results, rule_number)
+
+    # visualises the all rules based on precomputed term
+    def iterate_and_view_all_rules(self):
+        if not self._all_results:
+            print("Grids must be solved prior to visualsation")
+        for rule_num in range(256):
+            self.view_rule_number(rule_num)
