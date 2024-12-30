@@ -4,6 +4,7 @@ import random
 import matplotlib.pyplot as plt
 
 
+# Class that simulates and visualises the Meca automaton
 class Meca_Cellular_Automata:
     def __init__(self, number_of_epochs, len_intial_grid
                 ):
@@ -12,25 +13,25 @@ class Meca_Cellular_Automata:
         self._intial_grid = self._create_intial_grid(len_intial_grid)
         self._all_results = {}
 
-    # creates random intial grid of size n
+    # Creates random intial grid to evolve of the selected length
     def _create_intial_grid(self, len_intial_grid):
         return np.array([random.randint(0, 1) for _ in range(len_intial_grid)])
     
-    # Generate the value grid for each rule
+    # Generate the value grid for rule
     def _generate_value_grid(self, rule_number):
         binary_repr = f"{rule_number:08b}" 
         return {i: int(binary_repr[7 - i]) for i in range(8)}
 
-    # compare the binary inputs and return result
+    # Compare the binary inputs and return result based on inputed rule set
     def _convert_to_binary_compare(self, input_list, value_grid):
         binary_int = (input_list[0] << 2) | (input_list[1] << 1) | input_list[2]
         return value_grid[binary_int]
 
 
-    # evolve grid from state t to state t+1
+    # Evolve grid from state t to state t+1
     def _evolve_grid_meca(self, value_grid, prev_grid, curr_grid):
-        left_neighbors = np.roll(prev_grid, -2)
-        right_neighbors = np.roll(prev_grid, 2)
+        left_neighbors = np.roll(prev_grid, -1)
+        right_neighbors = np.roll(prev_grid, 1)
 
         new_grid = np.array([
             self._convert_to_binary_compare([left_neighbors[i], prev_grid[i], right_neighbors[i]], value_grid)
@@ -39,7 +40,7 @@ class Meca_Cellular_Automata:
 
         return new_grid
 
-    # iterate evolution n times
+    # Iterate through the grid evolution n-times
     def _evolve_grid_n_times_meca(self, epochs, intial_grid, value_grid):
         prev_grid = intial_grid.copy()
         curr_grid = intial_grid.copy()
@@ -53,18 +54,18 @@ class Meca_Cellular_Automata:
 
         return results
 
+    # Visualize the evolution of the grid
     def _plot_binary_map(self, results, rule_number):
-        # Visualize the evolution of the grid
         plt.figure(figsize=(15, 10))
         plt.imshow(results, cmap='binary', interpolation='nearest', aspect='auto')
         plt.colorbar(label="State (0 or 1)")
         plt.xlabel("Cell Index")
         plt.ylabel("Epoch")
         value_grid = self._generate_value_grid(rule_number)
-        plt.title(f"Evolution of Cellular Automaton based on rule number: {rule_number} \n {value_grid}")
+        plt.title(f"Evolution of Memory-Based Cellular Automaton based on rule number: {rule_number} \n {value_grid}")
         plt.show()
 
-    # Simulate all of the rules defined 
+    # Simulate all of the defined rules  
     def _simulate_all_rules(self):
         for rule_number in range(256):
             value_grid = self._generate_value_grid(rule_number)
@@ -76,16 +77,14 @@ class Meca_Cellular_Automata:
                 print("I have finished solving the whole space of grids")
 
 
-    # visualises the selected rule based on precomputed term
+    # Visualises the selected rule based on precomputed results
     def view_rule_number(self, rule_number):
         results = self._all_results[rule_number]
         if not results:
-            print("Grids must be solved prior to visualsation")
+            print("Grids must be solved prior to visualisation")
         self._plot_binary_map(results, rule_number)
 
-    # visualises the all rules based on precomputed term
+    # Visualises all rules based on precomputed term (use with caution due to memory requirements)
     def iterate_and_view_all_rules(self):
-        if not self._all_results:
-            print("Grids must be solved prior to visualsation")
         for rule_num in range(256):
             self.view_rule_number(rule_num)
