@@ -6,16 +6,16 @@ import matplotlib.pyplot as plt
 
 # Class that simulates and visualises the Meca automaton
 class Meca_Cellular_Automata:
-    def __init__(self, number_of_epochs, len_intial_grid
+    def __init__(self, number_of_epochs, len_initial_grid
                 ):
         
         self._number_of_epochs = number_of_epochs
-        self._intial_grid = self._create_intial_grid(len_intial_grid)
+        self._intial_grid = self._create_initial_grid(len_initial_grid)
         self._all_results = {}
 
     # Creates random intial grid to evolve of the selected length
-    def _create_intial_grid(self, len_intial_grid):
-        return np.array([random.randint(0, 1) for _ in range(len_intial_grid)])
+    def _create_initial_grid(self, len_initial_grid):
+        return np.array([random.randint(0, 1) for _ in range(len_initial_grid)])
     
     # Generate the value grid for rule
     def _generate_value_grid(self, rule_number):
