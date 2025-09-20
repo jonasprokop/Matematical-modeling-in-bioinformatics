@@ -1,0 +1,18 @@
+values:
+    - !!float 1e-5   # a1
+    - !!float 1e-3   # a2
+    - !!float 1e-2   # a3
+    - !!float 1e-4   # a4
+    - !!float 1e-2   # a5
+    - !!float 1e-2   # a6
+    - !!float 1e-4   # a7
+    - !!float 1e-2   # a8
+    - !!float 1e-2   # a9
+    - !!float 1e-2   # a10
+    - !!float 1e-2   # a11
+    - !!float 1e-4   # a12
+    - !!float 1e-2   # a13
+    - !!float 1e-4   # a14
+    - !!float 1      # a15
+    - !!float 1e-2   # a16
+    - !!float 1      # ar
